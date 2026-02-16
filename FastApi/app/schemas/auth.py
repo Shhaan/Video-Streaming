@@ -14,7 +14,7 @@ class LoginSchema(BaseModel):
     ):
         return cls(email=email, password=password)
     
-
+ 
 class UserSchema(BaseModel):
     email: str
     name: Optional[str] = None

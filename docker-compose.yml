@@ -4,6 +4,8 @@ services:
 
   auth:
     build: ./FastApi
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
     ports:
       - "8000:8000"
     volumes:
@@ -11,12 +13,12 @@ services:
     env_file:
       - .env.auth
     depends_on:
-      - auth_db
-    restart: always
+      - auth_db 
 
  
   video:
     build: ./Django
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --reload
     ports:
       - "8001:8000"
     volumes:
@@ -24,9 +26,27 @@ services:
     env_file:
       - .env.video
     depends_on:
-      - video_db
-    restart: always
+      - video_db 
 
+  video_queue:
+    build: ./Django
+    command: python -u consumer.py
+    volumes:
+      - ./Django:/app
+    env_file:
+      - .env.video
+    depends_on:
+      - video_db
+
+  auth_queue:
+    build: ./FastApi
+    command: python -u consumer.py
+    volumes:
+      - ./FastApi:/app
+    env_file:
+      - .env.auth
+    depends_on:
+      - auth_db
   video_db:
     image: postgres:15
     container_name:  video_db

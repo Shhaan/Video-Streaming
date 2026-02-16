@@ -2,6 +2,7 @@
 .env.video
 FastApi/private.pem
 FastApi/public.pem
+Django/public.pem
 env/ 
 __pycache__/
 *.py[cod]
