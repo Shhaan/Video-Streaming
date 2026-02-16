@@ -1,0 +1,11 @@
+.env.auth
+.env.video
+FastApi/private.pem
+FastApi/public.pem
+env/ 
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc 
+.idea
+Django/staticfiles

@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+
+  auth:
+    build: ./FastApi
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./FastApi:/app
+    env_file:
+      - .env.auth
+    depends_on:
+      - auth_db
+    restart: always
+
+ 
+  video:
+    build: ./Django
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./Django:/app
+    env_file:
+      - .env.video
+    depends_on:
+      - video_db
+    restart: always
+
+  video_db:
+    image: postgres:15
+    container_name:  video_db
+    environment:
+      POSTGRES_DB: video_video_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sql#786
+    volumes:
+      - video_data:/var/lib/postgresql/data
+    restart: always
+
+  auth_db:
+    image: postgres:15
+    container_name: auth_db
+    environment:
+      POSTGRES_DB:  video_auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sql#786
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+  nginx:
+    image: nginx:latest
+    container_name: gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - auth
+      - video
+    restart: always
+
+volumes:
+  auth_data:
+  video_data:
