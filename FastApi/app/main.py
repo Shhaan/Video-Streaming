@@ -9,8 +9,7 @@ settings = get_settings()
 
 app = FastAPI(
     title=settings.APP_NAME,
-    debug=settings.DEBUG,
-    root_path="/auth"
+    debug=settings.DEBUG 
 ) 
  
 if settings.BACKEND_CORS_ORIGINS:

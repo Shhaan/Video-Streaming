@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+
+  video:
+    build: .
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --reload
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - video_db 
+
+  video_queue:
+    build: .
+    command: python -u consumer.py
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - video_db
+
+  
+  video_db:
+    image: postgres:15
+    container_name:  video_db
+    environment:
+      POSTGRES_DB: video_video_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sql#786
+    volumes:
+      - video_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  migrations:
+    build: .
+    command: python manage.py migrate --noinput
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      video_db:
+        condition: service_healthy
+      
+  redis_video:
+    image: redis:7
+    container_name: redis_video
+    ports:
+      - "6379:6379"
+    restart: always
+
+ 
+
+volumes: 
+  video_data:

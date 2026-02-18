@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[str]  
     DATABASE_URL : str
     class Config:
-        env_file = "../.env.auth"
+        env_file = ".env"
         case_sensitive = True
 
 

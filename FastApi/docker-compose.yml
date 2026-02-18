@@ -1,0 +1,65 @@
+version: "3.9"
+
+services:
+
+  auth:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - auth_db 
+ 
+
+  auth_queue:
+    build: .
+    command: python -u consumer.py
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - auth_db
+ 
+
+  auth_db:
+    image: postgres:15
+    container_name: auth_db
+    environment:
+      POSTGRES_DB:  video_auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sql#786
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      
+  redis_auth:
+    image: redis:7
+    container_name: redis_auth
+    ports:
+      - "6380:6379"
+    restart: always
+
+  migrations:
+    build: .
+    command: alembic upgrade head
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      auth_db:
+        condition: service_healthy
+ 
+volumes:
+  auth_data: 
